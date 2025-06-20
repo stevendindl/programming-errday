@@ -1,8 +1,10 @@
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 {-# HLINT ignore "Eta reduce" #-}
+{-# HLINT ignore "Avoid lambda" #-}
 
 tricks :: [String]
-tricks = ["kickflip", "switch tre flip", "inward heel flip", "ollie"]
+tricks = ["kickflip", "switch tre flip", "inward heel flip", "ollie", "manual", 
+        "nose manual", "fakie bigspin", "nollie shuv"]
 
 -- String = list of Char
 -- "tre" == ['t', 'r', 'e']    is    True
@@ -35,19 +37,14 @@ switchStance regular ["kickflip, "tre flip", "fakie inward heel flip"]
 -}
 
 switchStance :: String -> [String] -> [String]
-switchStance s ts =
-    if stanceValid then
-        map (\t ->
-            if s /= "regular" then
-                if not (nollieOllie s t) then
-                    s ++ " " ++ stanceDrop t
-                else s
-            else stanceDrop t
-        ) ts
-    else ts
+switchStance s ts = 
+    if stanceValid then 
+        map (\t -> convertTrick s (revertTrick t)) ts
+    else 
+        ts
     where
-        stanceValid = s == "nollie" || s == "fakie" || s == "switch" || s == "regular"
-        nollieOllie s t = s == "nollie" && (t == "ollie" || t == "nollie")
+        stanceValid = s == "nollie" || s == "fakie" 
+                    || s == "switch" || s == "regular"
 
 -- Drops a stances t = fakie ollie & s = fakie -> ollie
 stanceDrop :: String -> String
@@ -58,18 +55,30 @@ stanceDrop t
     | take 5 t == "fakie"       = drop 6 t
     | otherwise                 = t
 
--- -- Reverts the trick back to its base
--- revertTrick :: String -> String
--- revertTrick t
---     | t == "nollie"         = "ollie"
---     | t == "nose manuel"    = "manuel"
---     | otherwise             = t
+-- Reverts the trick back to its base
+revertTrick :: String -> String
+revertTrick t
+    | t == "nollie" || t == "folly" || t == "swally ollie"   = "ollie"
+    | t == "nose manual"    = "manual"
+    | otherwise             = stanceDrop t
 
--- convertTrickSpecial :: String -> String -> String
--- convertTrickSpecial "nollie" t 
---     | ollie         = "nollie"
---     | 
---     | otherwise     = "nollie " ++ t
+convertTrick :: String -> String -> String
+convertTrick "nollie" t 
+    | t == "ollie"          = "nollie"
+    | t == "manual"         = "nose manual"
+    | otherwise             = "nollie " ++ t
+
+convertTrick "switch" t 
+    | t == "ollie"          = "swally ollie"
+    | otherwise             = "switch " ++ t
+
+convertTrick "fakie" t 
+    | t == "ollie"          = "folly"
+    | otherwise             = "fakie " ++ t
+
+convertTrick "regular" t = t
+
+-- convertTrick s t = s ++ " " ++ t
 
 
 -- makeFakie
